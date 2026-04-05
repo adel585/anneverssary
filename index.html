@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy Birthday 💕</title>
+
+  <!-- ── Google Fonts ── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet" />
+
+  <!-- ════════════════════════════════════════
+       CSS
+  ════════════════════════════════════════ -->
+  <style>
+    /* ── CSS Variables ── */
+    :root {
+      --pink-light  : #f8c8d8;
+      --pink-mid    : #f4a7bb;
+      --pink-dark   : #c2185b;
+      --white       : #ffffff;
+      --cream       : #fff5f8;
+      --glow-color  : rgba(244, 167, 187, 0.6);
+      --shadow-soft : 0 8px 40px rgba(194, 24, 91, 0.18);
+    }
+
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow-x: hidden;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #fde8f0 0%, #f8c8d8 40%, #fce4ec 100%);
+      font-family: 'Cormorant Garamond', serif;
+      position: relative;
+    }
+
+    /* ── Canvas – background particles / confetti ── */
+    #bg-canvas {
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Hearts canvas (floating hearts layer) ── */
+    #hearts-canvas {
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+    #hearts-canvas.visible { opacity: 1; }
+
+    /* ── Center Card (glassmorphism) ── */
+    .card {
+      position: relative;
+      z-index: 10;
+      width: min(92vw, 420px);
+      padding: 2.4rem 2rem 2.6rem;
+      border-radius: 2.4rem;
+      background: rgba(255, 245, 248, 0.55);
+      backdrop-filter: blur(22px) saturate(1.4);
+      -webkit-backdrop-filter: blur(22px) saturate(1.4);
+      border: 1.5px solid rgba(255, 255, 255, 0.7);
+      box-shadow:
+        var(--shadow-soft),
+        0 2px 0 rgba(255,255,255,0.9) inset,
+        0 0 0 0 var(--glow-color);
+      display: flex; flex-direction: column; align-items: center; gap: 1.6rem;
+      transition: box-shadow 1.2s ease;
+      transform-style: preserve-3d; /* parallax */
+    }
+    .card.glowing {
+      box-shadow:
+        var(--shadow-soft),
+        0 2px 0 rgba(255,255,255,0.9) inset,
+        0 0 60px 12px var(--glow-color),
+        0 0 120px 40px rgba(248, 200, 216, 0.35);
+    }
+
+    /* ── Cake SVG wrapper ── */
+    .cake-wrap {
+      display: flex; align-items: center; justify-content: center;
+      animation: cakePulse 3s ease-in-out infinite;
+    }
+    .cake-wrap.sparkle-active { animation: cakePop 0.5s cubic-bezier(.36,1.6,.64,1) forwards, cakePulse 3s ease-in-out 0.5s infinite; }
+
+    @keyframes cakePulse {
+      0%,100% { transform: scale(1) translateY(0); }
+      50%      { transform: scale(1.03) translateY(-4px); }
+    }
+    @keyframes cakePop {
+      0%   { transform: scale(1); }
+      60%  { transform: scale(1.18); }
+      100% { transform: scale(1.08); }
+    }
+
+    /* ── Play Button ── */
+    .play-btn {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f4a7bb, #c2185b);
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 24px rgba(194, 24, 91, 0.35);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.6s ease;
+      flex-shrink: 0;
+    }
+    .play-btn:hover  { transform: scale(1.08); box-shadow: 0 6px 32px rgba(194,24,91,0.5); }
+    .play-btn:active { transform: scale(0.96); }
+    .play-btn.hidden { opacity: 0; pointer-events: none; height: 0; margin: 0; padding: 0; overflow: hidden; }
+
+    .play-btn svg { margin-left: 4px; }
+
+    /* ── Text section ── */
+    .messages {
+      text-align: center;
+      min-height: 140px;
+      display: flex; flex-direction: column; align-items: center; gap: 1.1rem;
+    }
+
+    /* Main heading (typewriter) */
+    .main-title {
+      font-family: 'Great Vibes', cursive;
+      font-size: clamp(2rem, 9vw, 3rem);
+      color: var(--pink-dark);
+      text-shadow:
+        0 0 20px rgba(194, 24, 91, 0.3),
+        0 2px 8px rgba(194, 24, 91, 0.15);
+      letter-spacing: 0.01em;
+      line-height: 1.15;
+      visibility: hidden;
+    }
+    .main-title.visible { visibility: visible; }
+
+    /* Blinking cursor */
+    .cursor {
+      display: inline-block;
+      width: 2px; height: 1em;
+      background: var(--pink-dark);
+      margin-left: 2px;
+      vertical-align: middle;
+      animation: blink 0.7s step-end infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* Sub messages */
+    .sub-msg {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(1rem, 4vw, 1.2rem);
+      color: #9c3f6b;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 1s ease, transform 1s ease;
+      letter-spacing: 0.02em;
+      line-height: 1.5;
+    }
+    .sub-msg.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── Sparkles (absolute, injected by JS) ── */
+    .sparkle {
+      position: absolute;
+      pointer-events: none;
+      border-radius: 50%;
+      animation: sparkleFade 1.2s ease forwards;
+    }
+    @keyframes sparkleFade {
+      0%   { transform: scale(0) rotate(0deg);   opacity: 1; }
+      60%  { transform: scale(1.2) rotate(180deg); opacity: 0.9; }
+      100% { transform: scale(0) rotate(360deg); opacity: 0; }
+    }
+
+    /* ── Utility ── */
+    .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
+  </style>
+</head>
+
+<body>
+
+  <!-- Background particle canvas -->
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+  <!-- Floating hearts canvas -->
+  <canvas id="hearts-canvas" aria-hidden="true"></canvas>
+
+  <!-- Audio element – replace src with your mp3 path -->
+  <audio id="bg-music" loop src="your-music.mp3" preload="none"></audio>
+
+  <!-- ── Center Card ── -->
+  <main class="card" id="card" role="main">
+
+    <!-- CSS/SVG Cake -->
+    <div class="cake-wrap" id="cakeWrap" aria-label="Animated birthday cake">
+      <svg id="cake-svg" width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Plate shadow -->
+        <ellipse cx="80" cy="148" rx="54" ry="8" fill="rgba(194,24,91,0.12)"/>
+
+        <!-- Bottom tier -->
+        <rect x="22" y="102" width="116" height="44" rx="14" fill="#f4a7bb"/>
+        <rect x="22" y="102" width="116" height="12" rx="6" fill="#f8c8d8"/>
+        <!-- Bottom tier dots -->
+        <circle cx="50" cy="122" r="5" fill="#c2185b" opacity="0.7"/>
+        <circle cx="80" cy="122" r="5" fill="#c2185b" opacity="0.7"/>
+        <circle cx="110" cy="122" r="5" fill="#c2185b" opacity="0.7"/>
+
+        <!-- Middle tier -->
+        <rect x="38" y="66" width="84" height="38" rx="12" fill="#f8c8d8"/>
+        <rect x="38" y="66" width="84" height="10" rx="5" fill="#fce4ec"/>
+        <!-- Middle tier dots -->
+        <circle cx="62" cy="84" r="4" fill="#e91e8c" opacity="0.6"/>
+        <circle cx="80" cy="84" r="4" fill="#e91e8c" opacity="0.6"/>
+        <circle cx="98" cy="84" r="4" fill="#e91e8c" opacity="0.6"/>
+
+        <!-- Top tier -->
+        <rect x="52" y="38" width="56" height="30" rx="10" fill="#fce4ec"/>
+        <rect x="52" y="38" width="56" height="9" rx="4.5" fill="#ffffff" opacity="0.7"/>
+
+        <!-- Cream swirls on top (wavy white blobs) -->
+        <ellipse cx="80" cy="37" rx="26" ry="8" fill="white" opacity="0.95"/>
+        <ellipse cx="66" cy="34" rx="9" ry="7" fill="white" opacity="0.9"/>
+        <ellipse cx="94" cy="34" rx="9" ry="7" fill="white" opacity="0.9"/>
+        <ellipse cx="80" cy="31" rx="14" ry="6" fill="white"/>
+
+        <!-- Strawberry on top -->
+        <ellipse cx="80" cy="28" rx="7" ry="8" fill="#e53935"/>
+        <ellipse cx="80" cy="22" rx="3" ry="2.5" fill="#43a047"/>
+        <line x1="80" y1="22" x2="80" y2="18" stroke="#43a047" stroke-width="1.5" stroke-linecap="round"/>
+
+        <!-- Candles (3) -->
+        <!-- Candle 1 -->
+        <rect x="62" y="20" width="6" height="18" rx="3" fill="#f4a7bb"/>
+        <ellipse cx="65" cy="19" rx="3" ry="2" fill="#ffe082"/>
+        <!-- Flame 1 -->
+        <ellipse cx="65" cy="14" rx="3" ry="5" fill="#ffca28" opacity="0.95">
+          <animate attributeName="rx" values="3;2.2;3" dur="0.8s" repeatCount="indefinite"/>
+          <animate attributeName="ry" values="5;6;5" dur="0.8s" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse cx="65" cy="15" rx="1.5" ry="3" fill="#ff8f00" opacity="0.8">
+          <animate attributeName="ry" values="3;4;3" dur="0.8s" repeatCount="indefinite"/>
+        </ellipse>
+
+        <!-- Candle 2 -->
+        <rect x="77" y="16" width="6" height="22" rx="3" fill="#f4a7bb"/>
+        <ellipse cx="80" cy="15" rx="3" ry="2" fill="#ffe082"/>
+        <!-- Flame 2 -->
+        <ellipse cx="80" cy="10" rx="3" ry="5" fill="#ffca28" opacity="0.95">
+          <animate attributeName="rx" values="3;2;3" dur="0.9s" repeatCount="indefinite"/>
+          <animate attributeName="ry" values="5;6.5;5" dur="0.9s" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse cx="80" cy="11" rx="1.5" ry="3" fill="#ff8f00" opacity="0.8">
+          <animate attributeName="ry" values="3;4.2;3" dur="0.9s" repeatCount="indefinite"/>
+        </ellipse>
+
+        <!-- Candle 3 -->
+        <rect x="92" y="20" width="6" height="18" rx="3" fill="#f4a7bb"/>
+        <ellipse cx="95" cy="19" rx="3" ry="2" fill="#ffe082"/>
+        <!-- Flame 3 -->
+        <ellipse cx="95" cy="14" rx="3" ry="5" fill="#ffca28" opacity="0.95">
+          <animate attributeName="rx" values="3;2.4;3" dur="0.75s" repeatCount="indefinite"/>
+          <animate attributeName="ry" values="5;6.2;5" dur="0.75s" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse cx="95" cy="15" rx="1.5" ry="3" fill="#ff8f00" opacity="0.8">
+          <animate attributeName="ry" values="3;3.8;3" dur="0.75s" repeatCount="indefinite"/>
+        </ellipse>
+      </svg>
+    </div>
+
+    <!-- Play Button -->
+    <button class="play-btn" id="playBtn" aria-label="Play music and start animation">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+        <path d="M8 5.14v14l11-7-11-7z"/>
+      </svg>
+    </button>
+
+    <!-- Messages -->
+    <div class="messages" id="messages">
+      <!-- Main animated title -->
+      <h1 class="main-title" id="mainTitle" aria-live="polite">
+        <span id="typedText"></span><span class="cursor" id="cursor" style="display:none"></span>
+      </h1>
+      <!-- Sub-messages -->
+      <p class="sub-msg" id="msg2">Another year, another glow ✨ Wishing you a day as amazing as your vibe.</p>
+      <p class="sub-msg" id="msg3">You don’t just get older, you get better 😌 Hope this year brings you everything you deserve. 🌸</p>
+       <p class="sub-msg" id="msg4" style="font-family:'Great Vibes',cursive; font-size:1.6rem; color:#c2185b; margin-top:0.5rem;">💌 With love, B.Adel 💕</p>
+    </div>
+
+  </main>
+
+
+  <!-- ════════════════════════════════════════
+       JAVASCRIPT
+  ════════════════════════════════════════ -->
+  <script>
+  /* ═══════════════════════════════════════════════════
+     1. BACKGROUND CANVAS – particles, confetti, circles
+  ═══════════════════════════════════════════════════ */
+  (function () {
+    const canvas = document.getElementById('bg-canvas');
+    const ctx    = canvas.getContext('2d');
+
+    let W, H, particles = [];
+
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    /* Particle types: 'circle', 'star', 'confetti' */
+    function randomParticle() {
+      const types  = ['circle','circle','circle','star','confetti','confetti'];
+      const colors = ['#f8c8d8','#f4a7bb','#ffffff','#fce4ec','#f48fb1','#ffcdd2'];
+      const type   = types[Math.floor(Math.random() * types.length)];
+      return {
+        type,
+        x    : Math.random() * W,
+        y    : Math.random() * H,
+        r    : type === 'confetti' ? (Math.random() * 5 + 3) : (Math.random() * 8 + 3),
+        vx   : (Math.random() - 0.5) * 0.35,
+        vy   : -(Math.random() * 0.4 + 0.1),
+        color: colors[Math.floor(Math.random() * colors.length)],
+        alpha: Math.random() * 0.5 + 0.2,
+        angle: Math.random() * Math.PI * 2,
+        spin : (Math.random() - 0.5) * 0.03,
+        scale: 1,
+      };
+    }
+
+    function initParticles(n = 90) {
+      particles = [];
+      for (let i = 0; i < n; i++) {
+        const p = randomParticle();
+        p.y = Math.random() * H; // scattered initially
+        particles.push(p);
+      }
+    }
+
+    function drawStar(ctx, x, y, r, color, alpha) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle   = color;
+      ctx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const a = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+        const b = (i * 4 * Math.PI) / 5 + Math.PI * 0.4 - Math.PI / 2;
+        if (i === 0) ctx.moveTo(x + r * Math.cos(a), y + r * Math.sin(a));
+        else         ctx.lineTo(x + r * Math.cos(a), y + r * Math.sin(a));
+        ctx.lineTo(x + (r * 0.45) * Math.cos(b), y + (r * 0.45) * Math.sin(b));
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function loop() {
+      ctx.clearRect(0, 0, W, H);
+
+      particles.forEach((p, i) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.angle += p.spin;
+
+        // wrap around
+        if (p.y < -20)  p.y = H + 20;
+        if (p.x < -20)  p.x = W + 20;
+        if (p.x > W+20) p.x = -20;
+
+        if (p.type === 'circle') {
+          ctx.save();
+          ctx.globalAlpha = p.alpha;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+          ctx.restore();
+
+        } else if (p.type === 'star') {
+          drawStar(ctx, p.x, p.y, p.r, p.color, p.alpha);
+
+        } else { // confetti rectangle
+          ctx.save();
+          ctx.globalAlpha = p.alpha;
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.angle);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.r / 2, -p.r * 1.5, p.r, p.r * 3);
+          ctx.restore();
+        }
+      });
+
+      requestAnimationFrame(loop);
+    }
+
+    initParticles();
+    loop();
+  }());
+
+
+  /* ═══════════════════════════════════════════════════
+     2. FLOATING HEARTS CANVAS
+  ═══════════════════════════════════════════════════ */
+  const heartsCanvas = document.getElementById('hearts-canvas');
+  const hCtx         = heartsCanvas.getContext('2d');
+  let   hW, hH, hearts = [], heartsActive = false;
+
+  function resizeHearts() {
+    hW = heartsCanvas.width  = window.innerWidth;
+    hH = heartsCanvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeHearts);
+  resizeHearts();
+
+  function spawnHeart() {
+    const sizes  = [14, 18, 22, 28, 34];
+    const colors = ['#f4a7bb','#e91e8c','#c2185b','#f8c8d8','#ff80ab'];
+    hearts.push({
+      x    : Math.random() * hW,
+      y    : hH + 20,
+      size : sizes[Math.floor(Math.random() * sizes.length)],
+      color: colors[Math.floor(Math.random() * colors.length)],
+      vx   : (Math.random() - 0.5) * 1.2,
+      vy   : -(Math.random() * 1.8 + 1),
+      alpha: Math.random() * 0.5 + 0.5,
+      sway : Math.random() * Math.PI * 2,
+      swaySpeed: Math.random() * 0.03 + 0.01,
+    });
+  }
+
+  function drawHeart(ctx, x, y, size, color, alpha) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle   = color;
+    ctx.beginPath();
+    const s = size / 30;
+    ctx.translate(x, y);
+    ctx.scale(s, s);
+    ctx.moveTo(0, -8);
+    ctx.bezierCurveTo(8, -20, 24, -14, 24, 0);
+    ctx.bezierCurveTo(24, 12, 12, 22, 0, 30);
+    ctx.bezierCurveTo(-12, 22, -24, 12, -24, 0);
+    ctx.bezierCurveTo(-24, -14, -8, -20, 0, -8);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  let heartSpawnTimer = 0;
+
+  function heartsLoop() {
+    hCtx.clearRect(0, 0, hW, hH);
+
+    if (heartsActive) {
+      heartSpawnTimer++;
+      if (heartSpawnTimer % 28 === 0) spawnHeart(); // new heart every ~28 frames
+    }
+
+    hearts.forEach((h, i) => {
+      h.sway += h.swaySpeed;
+      h.x    += Math.sin(h.sway) * 0.6 + h.vx;
+      h.y    += h.vy;
+      h.alpha -= 0.004;
+
+      if (h.alpha > 0) {
+        drawHeart(hCtx, h.x, h.y, h.size, h.color, h.alpha);
+      } else {
+        hearts.splice(i, 1);
+      }
+    });
+
+    requestAnimationFrame(heartsLoop);
+  }
+  heartsLoop();
+
+
+  /* ═══════════════════════════════════════════════════
+     3. PARALLAX – mouse + device tilt
+  ═══════════════════════════════════════════════════ */
+  const card = document.getElementById('card');
+
+  document.addEventListener('mousemove', (e) => {
+    const cx  = window.innerWidth  / 2;
+    const cy  = window.innerHeight / 2;
+    const dx  = (e.clientX - cx) / cx;  // -1 to 1
+    const dy  = (e.clientY - cy) / cy;
+    card.style.transform = `perspective(800px) rotateY(${dx * 5}deg) rotateX(${-dy * 5}deg)`;
+  });
+
+  window.addEventListener('deviceorientation', (e) => {
+    const dx = (e.gamma || 0) / 45; // -1 to 1
+    const dy = (e.beta  || 0) / 45;
+    card.style.transform = `perspective(800px) rotateY(${dx * 5}deg) rotateX(${-dy * 5}deg)`;
+  });
+
+
+  /* ═══════════════════════════════════════════════════
+     4. ANIMATION SEQUENCE
+  ═══════════════════════════════════════════════════ */
+  const playBtn  = document.getElementById('playBtn');
+  const music    = document.getElementById('bg-music');
+  const cakeWrap = document.getElementById('cakeWrap');
+  const mainTitle= document.getElementById('mainTitle');
+  const typedText= document.getElementById('typedText');
+  const cursor   = document.getElementById('cursor');
+  const msg2     = document.getElementById('msg2');
+  const msg3     = document.getElementById('msg3');
+
+  const FULL_TEXT = 'Happy Birthday ❤️';
+
+  /* Sparkle burst around cake */
+  function burstSparkles() {
+    const rect = cakeWrap.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
+    const cx = rect.left + rect.width  / 2 - cardRect.left;
+    const cy = rect.top  + rect.height / 2 - cardRect.top;
+    const colors = ['#c2185b','#f4a7bb','#ffca28','#ffffff','#e91e8c'];
+
+    for (let i = 0; i < 20; i++) {
+      const el = document.createElement('div');
+      el.className = 'sparkle';
+      const size = Math.random() * 10 + 4;
+      const angle= Math.random() * Math.PI * 2;
+      const dist = Math.random() * 80 + 20;
+      el.style.cssText = `
+        width:${size}px; height:${size}px;
+        background:${colors[Math.floor(Math.random() * colors.length)]};
+        left:${cx + Math.cos(angle) * dist - size/2}px;
+        top :${cy + Math.sin(angle) * dist - size/2}px;
+        animation-delay:${Math.random() * 0.3}s;
+        opacity:0.9;
+      `;
+      card.appendChild(el);
+      el.addEventListener('animationend', () => el.remove());
+    }
+  }
+
+  /* Typewriter */
+  function typeWriter(text, el, cb) {
+    let i = 0;
+    mainTitle.classList.add('visible');
+    cursor.style.display = 'inline-block';
+
+    function tick() {
+      if (i < text.length) {
+        // handle emoji safely
+        const code = text.codePointAt(i);
+        const char  = String.fromCodePoint(code);
+        el.textContent += char;
+        i += char.length > 1 ? 2 : 1;
+        setTimeout(tick, i < 10 ? 90 : Math.random() * 80 + 50);
+      } else {
+        cursor.style.display = 'none';
+        if (cb) cb();
+      }
+    }
+    tick();
+  }
+
+  /* Main sequence triggered on play */
+  function startSequence() {
+    // Step 1: Hide play button
+    playBtn.classList.add('hidden');
+
+    // Step 2: Cake pop + sparkles
+    setTimeout(() => {
+      cakeWrap.classList.add('sparkle-active');
+      burstSparkles();
+    }, 300);
+
+    // Step 3: Typewriter title
+    setTimeout(() => {
+      typeWriter(FULL_TEXT, typedText, () => {
+        // Step 4: Hearts start
+        heartsCanvas.classList.add('visible');
+        heartsActive = true;
+
+        // Step 5: Sub-messages fade in
+        setTimeout(() => msg2.classList.add('visible'), 400);
+        setTimeout(() => msg3.classList.add('visible'), 1600);
+        setTimeout(() => document.getElementById('msg4').classList.add('visible'), 2600);
+
+        // Step 6: Final glow
+        setTimeout(() => card.classList.add('glowing'), 2200);
+      });
+    }, 900);
+  }
+
+  /* Play button click */
+  playBtn.addEventListener('click', () => {
+    music.play().catch(() => {/* autoplay blocked – silent fail */});
+    startSequence();
+  });
+
+  </script>
+</body>
+</html>
