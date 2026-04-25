@@ -72,7 +72,8 @@
     .card {
       position: relative;
       z-index: 10;
-      width: min(92vw, 430px);
+      width: min(84vw, 430px);
+      margin: 2rem auto;
       padding: 2.6rem 2.2rem 2.8rem;
       border-radius: 2.8rem;
       background: rgba(255, 245, 248, 0.58);
@@ -259,6 +260,69 @@
     /* ── Utility ── */
     .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
 
+    /* ── Mobile Responsiveness ── */
+    body {
+      padding: 1.5rem;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 1.2rem 1rem;
+        align-items: center;
+      }
+
+      .card {
+        width: min(88vw, 360px);
+        padding: 1.8rem 1.4rem 2rem;
+        border-radius: 2rem;
+        gap: 1.2rem;
+      }
+
+      .name-badge {
+        font-size: clamp(1.5rem, 8vw, 2rem);
+      }
+
+      #cake-svg {
+        width: 130px;
+        height: 130px;
+      }
+
+      .play-btn {
+        width: 56px;
+        height: 56px;
+      }
+
+      .messages {
+        min-height: unset;
+        gap: 0.9rem;
+      }
+
+      .main-title {
+        font-size: clamp(1.7rem, 8vw, 2.4rem);
+      }
+
+      .sub-msg {
+        font-size: clamp(0.9rem, 3.8vw, 1.05rem);
+      }
+
+      #msg4 {
+        font-size: 0.92rem !important;
+        padding: 0.4em 1em;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .card {
+        width: 86vw;
+        padding: 1.5rem 1.1rem 1.7rem;
+      }
+
+      #cake-svg {
+        width: 110px;
+        height: 110px;
+      }
+    }
+
     /* ── Divider line ── */
     .divider {
       width: 60px;
@@ -385,7 +449,7 @@
       <p class="sub-msg" id="msg2">Another year, another glow ✨ Wishing you a day as amazing as your vibe.</p>
       <p class="sub-msg" id="msg3">You don't just get older, you get better 😌 Hope this year brings you everything you deserve. 🌸</p>
       <div class="divider" id="divider1"></div>
-      <p class="sub-msg" id="msg4" style="font-family:'Great Vibes',cursive; font-size:1.6rem; color:#c2185b; margin-top:0.5rem;">💌 By, B.Adel 💕</p>
+      <p class="sub-msg" id="msg4" style="font-family:'Great Vibes',cursive; font-size:1.6rem; color:#c2185b; margin-top:0.5rem;">💌 With love, B.Adel 💕</p>
     </div>
 
   </main>
@@ -601,7 +665,7 @@
       vx    : side === 'left' ? (Math.random() * 0.5 + 0.2) : -(Math.random() * 0.5 + 0.2),
       vy    : (Math.random() - 0.5) * 0.3,
       alpha : 0,
-      targetAlpha: Math.random() * 0.18 + 0.07, // very subtle: 7–25%
+      targetAlpha: Math.random() * 0.18 + 0.10, // visible but soft: 10–28%
       fontSize,
       angle : (Math.random() - 0.5) * 0.2, // slight tilt
       life  : 0,
@@ -642,7 +706,7 @@
       tCtx.translate(b.x, b.y);
       tCtx.rotate(b.angle);
       tCtx.font = `${b.fontSize}px 'DM Sans', sans-serif`;
-      tCtx.fillStyle = '#c2185b';
+      tCtx.fillStyle = '#d4729a';
       tCtx.fillText(funnyText, 0, 0);
       tCtx.restore();
     });
