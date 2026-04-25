@@ -8,7 +8,7 @@
   <!-- ── Google Fonts ── -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
 
   <!-- ════════════════════════════════════════
        CSS
@@ -58,24 +58,39 @@
     }
     #hearts-canvas.visible { opacity: 1; }
 
+    /* ── Funny text canvas (background floating text) ── */
+    #text-canvas {
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 1.2s ease;
+    }
+    #text-canvas.visible { opacity: 1; }
+
     /* ── Center Card (glassmorphism) ── */
     .card {
       position: relative;
       z-index: 10;
-      width: min(92vw, 420px);
-      padding: 2.4rem 2rem 2.6rem;
-      border-radius: 2.4rem;
-      background: rgba(255, 245, 248, 0.55);
-      backdrop-filter: blur(22px) saturate(1.4);
-      -webkit-backdrop-filter: blur(22px) saturate(1.4);
-      border: 1.5px solid rgba(255, 255, 255, 0.7);
+      width: min(92vw, 430px);
+      padding: 2.6rem 2.2rem 2.8rem;
+      border-radius: 2.8rem;
+      background: rgba(255, 245, 248, 0.58);
+      backdrop-filter: blur(28px) saturate(1.5);
+      -webkit-backdrop-filter: blur(28px) saturate(1.5);
+      border: 1.5px solid rgba(255, 255, 255, 0.75);
       box-shadow:
         var(--shadow-soft),
-        0 2px 0 rgba(255,255,255,0.9) inset,
+        0 2px 0 rgba(255,255,255,0.95) inset,
         0 0 0 0 var(--glow-color);
-      display: flex; flex-direction: column; align-items: center; gap: 1.6rem;
-      transition: box-shadow 1.2s ease;
-      transform-style: preserve-3d; /* parallax */
+      display: flex; flex-direction: column; align-items: center; gap: 1.7rem;
+      transition: box-shadow 1.2s ease, transform 0.1s ease;
+      transform-style: preserve-3d;
+    }
+    .card:hover {
+      box-shadow:
+        0 16px 60px rgba(194, 24, 91, 0.22),
+        0 2px 0 rgba(255,255,255,0.95) inset;
     }
     .card.glowing {
       box-shadow:
@@ -83,6 +98,34 @@
         0 2px 0 rgba(255,255,255,0.9) inset,
         0 0 60px 12px var(--glow-color),
         0 0 120px 40px rgba(248, 200, 216, 0.35);
+    }
+
+    /* ── "insaaf" name display ── */
+    .name-badge {
+      font-family: 'Great Vibes', cursive;
+      font-size: clamp(1.8rem, 7vw, 2.5rem);
+      color: var(--pink-dark);
+      letter-spacing: 0.03em;
+      opacity: 0;
+      transform: translateY(-8px) scale(0.95);
+      transition: opacity 0.9s ease, transform 0.9s cubic-bezier(.34,1.56,.64,1);
+      text-shadow:
+        0 0 30px rgba(194, 24, 91, 0.25),
+        0 2px 8px rgba(194, 24, 91, 0.12);
+      position: relative;
+    }
+    .name-badge::before, .name-badge::after {
+      content: '✦';
+      font-size: 0.55em;
+      color: var(--pink-mid);
+      position: relative;
+      top: -0.2em;
+      margin: 0 0.4em;
+      opacity: 0.7;
+    }
+    .name-badge.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
     }
 
     /* ── Cake SVG wrapper ── */
@@ -104,17 +147,32 @@
 
     /* ── Play Button ── */
     .play-btn {
-      width: 64px; height: 64px;
+      width: 68px; height: 68px;
       border-radius: 50%;
       background: linear-gradient(135deg, #f4a7bb, #c2185b);
       border: none; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 24px rgba(194, 24, 91, 0.35);
-      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.6s ease;
+      box-shadow:
+        0 4px 24px rgba(194, 24, 91, 0.35),
+        0 1px 0 rgba(255,255,255,0.4) inset;
+      transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s ease, opacity 0.6s ease;
       flex-shrink: 0;
+      position: relative;
     }
-    .play-btn:hover  { transform: scale(1.08); box-shadow: 0 6px 32px rgba(194,24,91,0.5); }
-    .play-btn:active { transform: scale(0.96); }
+    .play-btn::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid rgba(194, 24, 91, 0.2);
+      animation: pulseRing 2s ease-out infinite;
+    }
+    @keyframes pulseRing {
+      0%   { transform: scale(1);   opacity: 0.7; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+    .play-btn:hover  { transform: scale(1.1); box-shadow: 0 8px 36px rgba(194,24,91,0.5), 0 1px 0 rgba(255,255,255,0.4) inset; }
+    .play-btn:active { transform: scale(0.95); }
     .play-btn.hidden { opacity: 0; pointer-events: none; height: 0; margin: 0; padding: 0; overflow: hidden; }
 
     .play-btn svg { margin-left: 4px; }
@@ -123,7 +181,7 @@
     .messages {
       text-align: center;
       min-height: 140px;
-      display: flex; flex-direction: column; align-items: center; gap: 1.1rem;
+      display: flex; flex-direction: column; align-items: center; gap: 1.15rem;
     }
 
     /* Main heading (typewriter) */
@@ -169,6 +227,22 @@
       transform: translateY(0);
     }
 
+    /* ── IMPROVED: With love signature ── */
+    #msg4 {
+      font-family: 'DM Sans', sans-serif !important;
+      font-weight: 400 !important;
+      font-size: 1.05rem !important;
+      color: #c2185b !important;
+      letter-spacing: 0.06em !important;
+      margin-top: 0.6rem !important;
+      background: rgba(244, 167, 187, 0.13);
+      border: 1px solid rgba(194, 24, 91, 0.15);
+      padding: 0.45em 1.2em;
+      border-radius: 2rem;
+      backdrop-filter: blur(4px);
+      font-style: normal !important;
+    }
+
     /* ── Sparkles (absolute, injected by JS) ── */
     .sparkle {
       position: absolute;
@@ -184,6 +258,17 @@
 
     /* ── Utility ── */
     .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
+
+    /* ── Divider line ── */
+    .divider {
+      width: 60px;
+      height: 1.5px;
+      background: linear-gradient(90deg, transparent, var(--pink-mid), transparent);
+      border-radius: 2px;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+    .divider.visible { opacity: 0.6; }
   </style>
 </head>
 
@@ -195,11 +280,17 @@
   <!-- Floating hearts canvas -->
   <canvas id="hearts-canvas" aria-hidden="true"></canvas>
 
+  <!-- Funny background text canvas -->
+  <canvas id="text-canvas" aria-hidden="true"></canvas>
+
   <!-- Audio element – replace src with your mp3 path -->
   <audio id="bg-music" loop src="your-music.mp3" preload="none"></audio>
 
   <!-- ── Center Card ── -->
   <main class="card" id="card" role="main">
+
+    <!-- Name badge: insaaf -->
+    <div class="name-badge" id="nameBadge" aria-label="insaaf">insaaf</div>
 
     <!-- CSS/SVG Cake -->
     <div class="cake-wrap" id="cakeWrap" aria-label="Animated birthday cake">
@@ -292,8 +383,9 @@
       </h1>
       <!-- Sub-messages -->
       <p class="sub-msg" id="msg2">Another year, another glow ✨ Wishing you a day as amazing as your vibe.</p>
-      <p class="sub-msg" id="msg3">You don’t just get older, you get better 😌 Hope this year brings you everything you deserve. 🌸</p>
-       <p class="sub-msg" id="msg4" style="font-family:'Great Vibes',cursive; font-size:1.6rem; color:#c2185b; margin-top:0.5rem;">💌 With love, B.Adel 💕</p>
+      <p class="sub-msg" id="msg3">You don't just get older, you get better 😌 Hope this year brings you everything you deserve. 🌸</p>
+      <div class="divider" id="divider1"></div>
+      <p class="sub-msg" id="msg4" style="font-family:'Great Vibes',cursive; font-size:1.6rem; color:#c2185b; margin-top:0.5rem;">💌 By, B.Adel 💕</p>
     </div>
 
   </main>
@@ -343,7 +435,7 @@
       particles = [];
       for (let i = 0; i < n; i++) {
         const p = randomParticle();
-        p.y = Math.random() * H; // scattered initially
+        p.y = Math.random() * H;
         particles.push(p);
       }
     }
@@ -373,7 +465,6 @@
         p.y += p.vy;
         p.angle += p.spin;
 
-        // wrap around
         if (p.y < -20)  p.y = H + 20;
         if (p.x < -20)  p.x = W + 20;
         if (p.x > W+20) p.x = -20;
@@ -390,7 +481,7 @@
         } else if (p.type === 'star') {
           drawStar(ctx, p.x, p.y, p.r, p.color, p.alpha);
 
-        } else { // confetti rectangle
+        } else {
           ctx.save();
           ctx.globalAlpha = p.alpha;
           ctx.translate(p.x, p.y);
@@ -464,7 +555,7 @@
 
     if (heartsActive) {
       heartSpawnTimer++;
-      if (heartSpawnTimer % 28 === 0) spawnHeart(); // new heart every ~28 frames
+      if (heartSpawnTimer % 28 === 0) spawnHeart();
     }
 
     hearts.forEach((h, i) => {
@@ -486,27 +577,103 @@
 
 
   /* ═══════════════════════════════════════════════════
-     3. PARALLAX – mouse + device tilt
+     3. FUNNY BACKGROUND TEXT CANVAS
+  ═══════════════════════════════════════════════════ */
+  const textCanvas = document.getElementById('text-canvas');
+  const tCtx       = textCanvas.getContext('2d');
+  let   tW, tH, textBubbles = [], textActive = false;
+
+  function resizeText() {
+    tW = textCanvas.width  = window.innerWidth;
+    tH = textCanvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeText);
+  resizeText();
+
+  const funnyText = 'happy birthday ya el motakabira 😂';
+
+  function spawnTextBubble() {
+    const side = Math.random() < 0.5 ? 'left' : 'right';
+    const fontSize = Math.random() * 6 + 11; // 11–17px – tiny & subtle
+    textBubbles.push({
+      x     : side === 'left' ? -10 : tW + 10,
+      y     : Math.random() * tH * 0.85 + tH * 0.05,
+      vx    : side === 'left' ? (Math.random() * 0.5 + 0.2) : -(Math.random() * 0.5 + 0.2),
+      vy    : (Math.random() - 0.5) * 0.3,
+      alpha : 0,
+      targetAlpha: Math.random() * 0.18 + 0.07, // very subtle: 7–25%
+      fontSize,
+      angle : (Math.random() - 0.5) * 0.2, // slight tilt
+      life  : 0,
+      maxLife: 420 + Math.random() * 200,
+    });
+  }
+
+  let textSpawnTimer = 0;
+
+  function textLoop() {
+    tCtx.clearRect(0, 0, tW, tH);
+
+    if (textActive) {
+      textSpawnTimer++;
+      if (textSpawnTimer % 90 === 0) spawnTextBubble(); // new one every ~90 frames
+    }
+
+    textBubbles = textBubbles.filter(b => b.life < b.maxLife);
+
+    textBubbles.forEach(b => {
+      b.life++;
+      b.x += b.vx;
+      b.y += b.vy;
+
+      // fade in / fade out
+      const fadeIn  = 40;
+      const fadeOut = 60;
+      if (b.life < fadeIn) {
+        b.alpha = (b.life / fadeIn) * b.targetAlpha;
+      } else if (b.life > b.maxLife - fadeOut) {
+        b.alpha = ((b.maxLife - b.life) / fadeOut) * b.targetAlpha;
+      } else {
+        b.alpha = b.targetAlpha;
+      }
+
+      tCtx.save();
+      tCtx.globalAlpha = b.alpha;
+      tCtx.translate(b.x, b.y);
+      tCtx.rotate(b.angle);
+      tCtx.font = `${b.fontSize}px 'DM Sans', sans-serif`;
+      tCtx.fillStyle = '#c2185b';
+      tCtx.fillText(funnyText, 0, 0);
+      tCtx.restore();
+    });
+
+    requestAnimationFrame(textLoop);
+  }
+  textLoop();
+
+
+  /* ═══════════════════════════════════════════════════
+     4. PARALLAX – mouse + device tilt
   ═══════════════════════════════════════════════════ */
   const card = document.getElementById('card');
 
   document.addEventListener('mousemove', (e) => {
     const cx  = window.innerWidth  / 2;
     const cy  = window.innerHeight / 2;
-    const dx  = (e.clientX - cx) / cx;  // -1 to 1
+    const dx  = (e.clientX - cx) / cx;
     const dy  = (e.clientY - cy) / cy;
     card.style.transform = `perspective(800px) rotateY(${dx * 5}deg) rotateX(${-dy * 5}deg)`;
   });
 
   window.addEventListener('deviceorientation', (e) => {
-    const dx = (e.gamma || 0) / 45; // -1 to 1
+    const dx = (e.gamma || 0) / 45;
     const dy = (e.beta  || 0) / 45;
     card.style.transform = `perspective(800px) rotateY(${dx * 5}deg) rotateX(${-dy * 5}deg)`;
   });
 
 
   /* ═══════════════════════════════════════════════════
-     4. ANIMATION SEQUENCE
+     5. ANIMATION SEQUENCE
   ═══════════════════════════════════════════════════ */
   const playBtn  = document.getElementById('playBtn');
   const music    = document.getElementById('bg-music');
@@ -516,6 +683,8 @@
   const cursor   = document.getElementById('cursor');
   const msg2     = document.getElementById('msg2');
   const msg3     = document.getElementById('msg3');
+  const nameBadge= document.getElementById('nameBadge');
+  const divider1 = document.getElementById('divider1');
 
   const FULL_TEXT = 'Happy Birthday ❤️';
 
@@ -554,7 +723,6 @@
 
     function tick() {
       if (i < text.length) {
-        // handle emoji safely
         const code = text.codePointAt(i);
         const char  = String.fromCodePoint(code);
         el.textContent += char;
@@ -570,6 +738,9 @@
 
   /* Main sequence triggered on play */
   function startSequence() {
+    // Step 0: Show name badge immediately
+    nameBadge.classList.add('visible');
+
     // Step 1: Hide play button
     playBtn.classList.add('hidden');
 
@@ -582,14 +753,24 @@
     // Step 3: Typewriter title
     setTimeout(() => {
       typeWriter(FULL_TEXT, typedText, () => {
-        // Step 4: Hearts start
+        // Step 4: Hearts + funny text start
         heartsCanvas.classList.add('visible');
         heartsActive = true;
+
+        textCanvas.classList.add('visible');
+        textActive = true;
+        // Seed a few immediately
+        for (let i = 0; i < 3; i++) {
+          setTimeout(() => spawnTextBubble(), i * 600);
+        }
 
         // Step 5: Sub-messages fade in
         setTimeout(() => msg2.classList.add('visible'), 400);
         setTimeout(() => msg3.classList.add('visible'), 1600);
-        setTimeout(() => document.getElementById('msg4').classList.add('visible'), 2600);
+        setTimeout(() => {
+          document.getElementById('msg4').classList.add('visible');
+          divider1.classList.add('visible');
+        }, 2600);
 
         // Step 6: Final glow
         setTimeout(() => card.classList.add('glowing'), 2200);
